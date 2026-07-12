@@ -40,6 +40,7 @@ function RootLayout() {
   const pathWithSearch = `${pathname}${location.searchStr}`;
   const hideEverythingPage = pathname === "/hide-everything";
   const shortsPage = pathname === "/shorts";
+  const embedPage = pathname.startsWith("/embed");
   const watchCinemaPage = pathname === "/watch" && cinemaMode;
   const wasWatchCinemaPage = useRef(watchCinemaPage);
   useSessionActivityReporting();
@@ -121,8 +122,16 @@ function RootLayout() {
     );
   }
 
+  if (embedPage) {
+    return (
+      <div className="fixed inset-0 bg-black">
+        <Outlet />
+      </div>
+    );
+  }
+
   const topPadding = { paddingTop: "calc(3.5rem + env(safe-area-inset-top, 0px))" };
-  const showTabBar = isMobile && !shortsPage && !watchCinemaPage;
+  const showTabBar = isMobile && !shortsPage && !watchCinemaPage && !embedPage;
   const mainBottomPad = showTabBar
     ? "pb-[calc(env(safe-area-inset-bottom)+4.5rem)]"
     : "pb-5 sm:pb-6";
