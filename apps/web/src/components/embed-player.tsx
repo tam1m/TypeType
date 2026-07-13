@@ -95,7 +95,6 @@ export function EmbedPlayer({
   onEnded,
 }: Props) {
   const ios = isIosDevice();
-  const srcKey = typeof src === "string" ? src : String(src.src);
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
   const shouldPreferOriginalLanguage = preferOriginalLanguage ?? true;
   const [toast, setToast] = useState<string | null>(null);
@@ -127,7 +126,6 @@ export function EmbedPlayer({
         </a>
       )}
       <MediaPlayer
-        key={srcKey}
         src={src}
         title={title}
         poster={poster}
@@ -168,8 +166,6 @@ export function EmbedPlayer({
           icons={defaultLayoutIcons}
           translations={{ Captions: "Subtitles" }}
           smallLayoutWhen={false}
-          menuContainer="body"
-          menuGroup="bottom"
           slots={{
             settingsMenuItemsStart: (
               <>
