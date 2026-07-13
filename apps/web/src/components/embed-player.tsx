@@ -149,6 +149,7 @@ export function EmbedPlayer({
           {subtitleTracks.map((s) => (
             <Track
               key={s.key}
+              id={s.id}
               kind="subtitles"
               src={s.src}
               label={s.label}
