@@ -1,16 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense } from "react";
+import { EmbedPlayerShell } from "../components/embed-player-shell";
 import { useAuth } from "../hooks/use-auth";
-import { usePlayerError } from "../hooks/use-player-error";
 import { useSettings } from "../hooks/use-settings";
 import { MEMBER_ONLY_MESSAGE, useStream } from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
 import { toWatchSourceUrl } from "../lib/watch-url";
-import type { VideoStream } from "../types/stream";
-
-const EmbedPlayer = lazy(() =>
-  import("../components/embed-player").then((module) => ({ default: module.EmbedPlayer })),
-);
 
 type EmbedSearch = {
   t?: string | number;
@@ -72,49 +66,6 @@ function EmbedSignIn() {
         </a>
       </div>
     </div>
-  );
-}
-
-function EmbedPlayerShell({
-  stream,
-  videoId,
-  startTime,
-  autoplay,
-}: {
-  stream: VideoStream;
-  videoId: string;
-  startTime: number;
-  autoplay: boolean;
-}) {
-  const { settings, settingsReady, update } = useSettings();
-  const isLive = stream.isLive ?? false;
-  const { manifestSrc, handleError, retryKey } = usePlayerError(
-    stream,
-    isLive,
-    settings.enableHighQualityPlayback,
-  );
-
-  const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
-
-  return (
-    <Suspense fallback={<EmbedLoading />}>
-      <EmbedPlayer
-        key={retryKey}
-        src={manifestSrc}
-        title={stream.title}
-        poster={stream.thumbnail}
-        subtitles={stream.subtitles}
-        startTime={startTime}
-        autoplay={autoplay}
-        settingsReady={settingsReady}
-        streamType={stream.isLive ? "live" : "on-demand"}
-        sponsorBlockSegments={stream.sponsorBlockSegments}
-        captionStyles={settings.captionStyles}
-        onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
-        onError={handleError}
-        watchUrl={watchUrl}
-      />
-    </Suspense>
   );
 }
 
