@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useMemo } from "react";
+import { lazy, Suspense } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { usePlayerError } from "../hooks/use-player-error";
 import { useSettings } from "../hooks/use-settings";
 import { MEMBER_ONLY_MESSAGE, useStream } from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
-import { resolveManifestSrc } from "../lib/stream-src";
 import { toWatchSourceUrl } from "../lib/watch-url";
+import type { VideoStream } from "../types/stream";
 
 const EmbedPlayer = lazy(() =>
   import("../components/embed-player").then((module) => ({ default: module.EmbedPlayer })),
@@ -74,6 +75,47 @@ function EmbedSignIn() {
   );
 }
 
+function EmbedPlayerShell({
+  stream,
+  videoId,
+  startTime,
+  autoplay,
+}: {
+  stream: VideoStream;
+  videoId: string;
+  startTime: number;
+  autoplay: boolean;
+}) {
+  const { settings, settingsReady } = useSettings();
+  const isLive = stream.isLive ?? false;
+  const { manifestSrc, handleError, retryKey } = usePlayerError(
+    stream,
+    isLive,
+    settings.enableHighQualityPlayback,
+  );
+
+  const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
+
+  return (
+    <Suspense fallback={<EmbedLoading />}>
+      <EmbedPlayer
+        key={retryKey}
+        src={manifestSrc}
+        title={stream.title}
+        poster={stream.thumbnail}
+        subtitles={stream.subtitles}
+        startTime={startTime}
+        autoplay={autoplay}
+        settingsReady={settingsReady}
+        streamType={stream.isLive ? "live" : "on-demand"}
+        sponsorBlockSegments={stream.sponsorBlockSegments}
+        onError={handleError}
+        watchUrl={watchUrl}
+      />
+    </Suspense>
+  );
+}
+
 function EmbedPage() {
   const { videoId } = Route.useParams();
   const { t, autoplay } = Route.useSearch();
@@ -88,11 +130,8 @@ function EmbedPage() {
     isError,
     error,
   } = useStream(sourceUrl, useAuthenticatedStream, streamEnabled);
-
-  const src = useMemo(() => {
-    if (!stream) return undefined;
-    return resolveManifestSrc(stream, stream.isLive ?? false, false, false);
-  }, [stream]);
+  const startTime = parseStartTime(t) * 1000;
+  const shouldAutoplay = autoplay === 1;
 
   if (isLoading && !stream) return <EmbedLoading />;
   if (!authReady) return <EmbedLoading />;
@@ -118,28 +157,13 @@ function EmbedPage() {
     return <EmbedError message={MEMBER_ONLY_MESSAGE} />;
   }
 
-  const startTime = parseStartTime(t);
-  const shouldAutoplay = autoplay === 1;
-
-  const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
-
-  if (!src) return <EmbedLoading />;
-
   return (
-    <Suspense fallback={<EmbedLoading />}>
-      <EmbedPlayer
-        src={src}
-        title={stream.title}
-        poster={stream.thumbnail}
-        subtitles={stream.subtitles}
-        startTime={startTime * 1000}
-        autoplay={shouldAutoplay}
-        settingsReady={settingsReady}
-        streamType={stream.isLive ? "live" : "on-demand"}
-        sponsorBlockSegments={stream.sponsorBlockSegments}
-        watchUrl={watchUrl}
-      />
-    </Suspense>
+    <EmbedPlayerShell
+      stream={stream}
+      videoId={videoId}
+      startTime={startTime}
+      autoplay={shouldAutoplay}
+    />
   );
 }
 
