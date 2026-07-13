@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { isIosDevice } from "../lib/ios-device";
 import type { MediaSrc } from "../lib/vidstack";
+import { patchVidstackProviderLoaders } from "../lib/vidstack-provider-loader-patch";
 import {
   DefaultVideoLayout,
   defaultLayoutIcons,
@@ -24,6 +25,8 @@ import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
 import { Toast } from "./toast";
 import { ChaptersTrack, onProviderChange } from "./video-player-core";
 import { VolumeRestorer } from "./volume-restorer";
+
+patchVidstackProviderLoaders();
 
 type Props = {
   src: MediaSrc;
