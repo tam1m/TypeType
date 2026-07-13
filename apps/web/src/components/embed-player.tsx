@@ -10,7 +10,9 @@ import {
   Track,
 } from "../lib/vidstack";
 import type { SponsorBlockSegmentItem, SubtitleItem } from "../types/api";
+import type { CaptionStyles } from "../types/user";
 import { AudioTrackSelector } from "./audio-track-selector";
+import { CaptionStyleRestorer } from "./caption-style-restorer";
 import { FormatSelector } from "./format-selector";
 import { MediaProgressEvents } from "./media-progress-events";
 import { MediaSessionSync } from "./media-session-sync";
@@ -51,6 +53,8 @@ type Props = {
   originalAudioLocale?: string | null;
   defaultSubtitleLanguage?: string;
   subtitlesEnabled?: boolean;
+  captionStyles?: CaptionStyles;
+  onCaptionStylesChange?: (styles: CaptionStyles) => void;
   onVolumeChange?: (volume: number, muted: boolean) => void;
   onTimeUpdate?: (positionMs: number) => void;
   onPause?: () => void;
@@ -81,6 +85,8 @@ export function EmbedPlayer({
   originalAudioLocale,
   defaultSubtitleLanguage,
   subtitlesEnabled,
+  captionStyles,
+  onCaptionStylesChange,
   onVolumeChange,
   onTimeUpdate,
   onPause,
@@ -195,6 +201,13 @@ export function EmbedPlayer({
           autoplay={autoplay}
           onVolumeChange={onVolumeChange}
         />
+        {captionStyles && onCaptionStylesChange && (
+          <CaptionStyleRestorer
+            captionStyles={captionStyles}
+            settingsReady={settingsReady}
+            onChange={onCaptionStylesChange}
+          />
+        )}
         <MediaSessionSync
           title={title}
           artwork={poster}

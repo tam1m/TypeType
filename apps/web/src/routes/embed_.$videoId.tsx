@@ -86,7 +86,7 @@ function EmbedPlayerShell({
   startTime: number;
   autoplay: boolean;
 }) {
-  const { settings, settingsReady } = useSettings();
+  const { settings, settingsReady, update } = useSettings();
   const isLive = stream.isLive ?? false;
   const { manifestSrc, handleError, retryKey } = usePlayerError(
     stream,
@@ -109,6 +109,8 @@ function EmbedPlayerShell({
         settingsReady={settingsReady}
         streamType={stream.isLive ? "live" : "on-demand"}
         sponsorBlockSegments={stream.sponsorBlockSegments}
+        captionStyles={settings.captionStyles}
+        onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
         onError={handleError}
         watchUrl={watchUrl}
       />
