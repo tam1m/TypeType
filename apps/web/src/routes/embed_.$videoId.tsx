@@ -12,12 +12,13 @@ const EmbedPlayer = lazy(() =>
 );
 
 type EmbedSearch = {
-  t?: string;
-  autoplay?: string;
+  t?: string | number;
+  autoplay?: number;
 };
 
-function parseStartTime(raw?: string): number {
-  if (!raw) return 0;
+function parseStartTime(raw?: string | number): number {
+  if (raw == null) return 0;
+  if (typeof raw === "number") return Math.max(0, raw);
   const trimmed = raw.trim();
   if (!trimmed) return 0;
   const num = Number(trimmed);
@@ -118,7 +119,7 @@ function EmbedPage() {
   }
 
   const startTime = parseStartTime(t);
-  const shouldAutoplay = autoplay === "1";
+  const shouldAutoplay = autoplay === 1;
 
   const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
 
@@ -133,6 +134,7 @@ function EmbedPage() {
         subtitles={stream.subtitles}
         startTime={startTime * 1000}
         autoplay={shouldAutoplay}
+        settingsReady={settingsReady}
         streamType={stream.isLive ? "live" : "on-demand"}
         sponsorBlockSegments={stream.sponsorBlockSegments}
         watchUrl={watchUrl}
@@ -143,8 +145,8 @@ function EmbedPage() {
 
 export const Route = createFileRoute("/embed_/$videoId")({
   validateSearch: (search: Record<string, unknown>): EmbedSearch => ({
-    t: typeof search.t === "string" ? search.t : undefined,
-    autoplay: typeof search.autoplay === "string" ? search.autoplay : undefined,
+    t: typeof search.t === "string" || typeof search.t === "number" ? search.t : undefined,
+    autoplay: typeof search.autoplay === "number" ? search.autoplay : undefined,
   }),
   component: EmbedPage,
 });
