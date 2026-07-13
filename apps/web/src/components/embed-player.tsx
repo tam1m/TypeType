@@ -23,7 +23,8 @@ import { SponsorBlockBar } from "./sponsorblock-bar";
 import { SponsorBlockCurrentSegment } from "./sponsorblock-current-segment";
 import { buildSafeSubtitleTracks } from "./subtitle-track-utils";
 import { Toast } from "./toast";
-import { ChaptersTrack, onProviderChange } from "./video-player-core";
+import { ChaptersTrack } from "./video-player-core";
+import { useVideoPlayerEvents } from "./video-player-events";
 import { VolumeRestorer } from "./volume-restorer";
 
 patchVidstackProviderLoaders();
@@ -92,6 +93,11 @@ export function EmbedPlayer({
   const subtitleTracks = buildSafeSubtitleTracks(subtitles);
   const shouldPreferOriginalLanguage = preferOriginalLanguage ?? true;
   const [toast, setToast] = useState<string | null>(null);
+  const { handleProviderChange, handleError, handleEnded } = useVideoPlayerEvents({
+    src,
+    onError,
+    onEnded,
+  });
 
   useEffect(() => {
     if (!toast) return;
@@ -128,9 +134,9 @@ export function EmbedPlayer({
         {...(ios ? { "webkit-playsinline": "true" } : {})}
         autoPlay={autoplay}
         storage={null}
-        onProviderChange={onProviderChange}
-        onError={() => onError?.()}
-        onEnded={() => onEnded?.()}
+        onProviderChange={handleProviderChange}
+        onError={handleError}
+        onEnded={handleEnded}
         className="w-full h-full dark"
       >
         <MediaProvider>
@@ -150,7 +156,7 @@ export function EmbedPlayer({
           onTimeUpdate={onTimeUpdate}
           onPause={onPause}
           onSeeked={onSeeked}
-          onEnded={onEnded}
+          onEnded={handleEnded}
         />
         <DefaultVideoLayout
           icons={defaultLayoutIcons}
