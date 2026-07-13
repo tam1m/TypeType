@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSettings } from "../hooks/use-settings";
+import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import type { VideoStream } from "../types/stream";
 import { EmbedPlayer } from "./embed-player";
 
@@ -32,6 +33,12 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
 
   const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
 
+  const { thumbnailVtt, chaptersVtt } = useWatchVttAssets(
+    stream,
+    stream.sponsorBlockSegments,
+    settings.sponsorBlockShowChapters,
+  );
+
   return (
     <Suspense fallback={<EmbedLoading />}>
       <EmbedPlayer
@@ -44,6 +51,8 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
         autoplay={autoplay}
         settingsReady={settingsReady}
         streamType={stream.isLive ? "live" : "on-demand"}
+        chaptersVtt={chaptersVtt}
+        thumbnailVtt={thumbnailVtt}
         sponsorBlockSegments={stream.sponsorBlockSegments}
         captionStyles={settings.captionStyles}
         onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}

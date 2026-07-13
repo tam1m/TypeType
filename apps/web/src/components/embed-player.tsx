@@ -40,6 +40,7 @@ type Props = {
   autoplay?: boolean;
   streamType?: "on-demand" | "live";
   chaptersVtt?: string;
+  thumbnailVtt?: string;
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
   autoSkipSponsorBlock?: boolean;
   watchUrl?: string;
@@ -72,6 +73,7 @@ export function EmbedPlayer({
   autoplay = false,
   streamType = "on-demand",
   chaptersVtt,
+  thumbnailVtt,
   sponsorBlockSegments,
   autoSkipSponsorBlock = true,
   watchUrl,
@@ -164,6 +166,7 @@ export function EmbedPlayer({
         />
         <DefaultVideoLayout
           icons={defaultLayoutIcons}
+          thumbnails={thumbnailVtt}
           translations={{ Captions: "Subtitles" }}
           smallLayoutWhen={false}
           slots={{
