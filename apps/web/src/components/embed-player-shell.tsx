@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSettings } from "../hooks/use-settings";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
@@ -11,16 +10,6 @@ type Props = {
   startTime: number;
   autoplay: boolean;
 };
-
-function EmbedLoading() {
-  return (
-    <div className="w-full h-full bg-black flex items-center justify-center">
-      <div className="aspect-video w-full max-w-[133.333vh]">
-        <div className="w-full h-full bg-black rounded-lg" />
-      </div>
-    </div>
-  );
-}
 
 export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props) {
   const { settings, settingsReady, update } = useSettings();
@@ -40,8 +29,7 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
   );
 
   return (
-    <Suspense fallback={<EmbedLoading />}>
-      <EmbedPlayer
+    <EmbedPlayer
         key={retryKey}
         src={manifestSrc}
         title={stream.title}
@@ -58,7 +46,6 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
         onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
         onError={handleError}
         watchUrl={watchUrl}
-      />
-    </Suspense>
+    />
   );
 }
