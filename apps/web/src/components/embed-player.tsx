@@ -179,6 +179,9 @@ export function EmbedPlayer({
           thumbnails={thumbnailVtt}
           translations={{ Captions: "Subtitles" }}
           smallLayoutWhen={false}
+          noModal
+          menuContainer="body"
+          menuGroup="bottom"
           slots={{
             settingsMenuItemsStart: (
               <>
