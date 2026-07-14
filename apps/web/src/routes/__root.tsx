@@ -40,7 +40,7 @@ function RootLayout() {
   const pathWithSearch = `${pathname}${location.searchStr}`;
   const hideEverythingPage = pathname === "/hide-everything";
   const shortsPage = pathname === "/shorts";
-  const embedPage = pathname.startsWith("/embed");
+  const embedPage = pathname.startsWith("/embed/");
   const watchCinemaPage = pathname === "/watch" && cinemaMode;
   const wasWatchCinemaPage = useRef(watchCinemaPage);
   useSessionActivityReporting();
