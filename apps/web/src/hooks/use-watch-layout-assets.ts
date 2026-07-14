@@ -31,17 +31,27 @@ export function useWatchVttAssets(
     };
   }, [stream.previewFrames]);
 
+  // native chapters
   useEffect(() => {
-    const vtt = stream.streamSegments
-      ? buildChaptersVtt(stream.streamSegments, stream.duration)
-      : showSponsorBlockChapters
-        ? buildSponsorBlockChaptersVtt(sponsorBlockSegments ?? [], stream.duration)
-        : null;
+    if (!stream.streamSegments) return;
+    const vtt = buildChaptersVtt(stream.streamSegments, stream.duration);
     setChaptersVtt(vtt);
     return () => {
       if (vtt) URL.revokeObjectURL(vtt);
     };
-  }, [stream.streamSegments, stream.duration, sponsorBlockSegments, showSponsorBlockChapters]);
+  }, [stream.streamSegments, stream.duration]);
+
+  // sponsorblock fallback
+  useEffect(() => {
+    if (stream.streamSegments) return;
+    const vtt = showSponsorBlockChapters
+      ? buildSponsorBlockChaptersVtt(sponsorBlockSegments ?? [], stream.duration)
+      : null;
+    setChaptersVtt(vtt);
+    return () => {
+      if (vtt) URL.revokeObjectURL(vtt);
+    };
+  }, [sponsorBlockSegments, showSponsorBlockChapters, stream.streamSegments, stream.duration]);
 
   return {
     thumbnailVtt: thumbnailVtt ?? undefined,
