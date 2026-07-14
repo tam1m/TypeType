@@ -5,7 +5,7 @@ import { useInstance } from "../hooks/use-instance";
 import { useSettings } from "../hooks/use-settings";
 import { MEMBER_ONLY_MESSAGE, useStream } from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
-import { toWatchSourceUrl } from "../lib/watch-url";
+import { toPublicWatchParam, toWatchSourceUrl } from "../lib/watch-url";
 
 type EmbedSearch = {
   t?: string | number;
@@ -74,7 +74,7 @@ function EmbedPage() {
   const { videoId } = Route.useParams();
   const { t, autoplay } = Route.useSearch();
   const sourceUrl = toWatchSourceUrl(videoId);
-  const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
+  const watchUrl = `/watch?v=${encodeURIComponent(toPublicWatchParam(sourceUrl))}`;
   const { data: instance, isLoading: instanceLoading } = useInstance();
   const { authReady, isAuthed } = useAuth();
   const { settings, settingsReady } = useSettings();
