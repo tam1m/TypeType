@@ -120,6 +120,7 @@ function EmbedPage() {
       videoId={videoId}
       startTime={startTime}
       autoplay={shouldAutoplay}
+      isAuthed={isAuthed}
     />
   );
 }

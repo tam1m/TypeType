@@ -42,7 +42,11 @@ type Props = {
   chaptersVtt?: string;
   thumbnailVtt?: string;
   sponsorBlockSegments?: SponsorBlockSegmentItem[];
+  autoSkipSponsorBlockSegments?: SponsorBlockSegmentItem[];
+  manualSkipSponsorBlockSegments?: SponsorBlockSegmentItem[];
   autoSkipSponsorBlock?: boolean;
+  muteSponsorBlockInsteadOfSkip?: boolean;
+  showCurrentSponsorBlockSegment?: boolean;
   watchUrl?: string;
   initialVolume?: number;
   initialMuted?: boolean;
@@ -75,7 +79,11 @@ export function EmbedPlayer({
   chaptersVtt,
   thumbnailVtt,
   sponsorBlockSegments,
-  autoSkipSponsorBlock = true,
+  autoSkipSponsorBlockSegments,
+  manualSkipSponsorBlockSegments,
+  autoSkipSponsorBlock = false,
+  muteSponsorBlockInsteadOfSkip = false,
+  showCurrentSponsorBlockSegment = false,
   watchUrl,
   initialVolume = 1,
   initialMuted = false,
@@ -216,19 +224,19 @@ export function EmbedPlayer({
         />
         <PlayerHotkeys canSeek={streamType !== "live"} />
         <PlayerPlayPauseIndicator />
-        {autoSkipSponsorBlock && sponsorBlockSegments && (
+        {autoSkipSponsorBlock && autoSkipSponsorBlockSegments && (
           <SponsorBlockSkipper
-            segments={sponsorBlockSegments}
-            muteInsteadOfSkip={false}
+            segments={autoSkipSponsorBlockSegments}
+            muteInsteadOfSkip={muteSponsorBlockInsteadOfSkip}
           />
         )}
         {sponsorBlockSegments && <SponsorBlockBar segments={sponsorBlockSegments} />}
-        {sponsorBlockSegments && (
+        {showCurrentSponsorBlockSegment && sponsorBlockSegments && (
           <SponsorBlockCurrentSegment
             segments={sponsorBlockSegments}
-            autoSkipSegments={sponsorBlockSegments}
-            manualSkipSegments={[]}
-            muteInsteadOfSkip={false}
+            autoSkipSegments={autoSkipSponsorBlockSegments}
+            manualSkipSegments={manualSkipSponsorBlockSegments}
+            muteInsteadOfSkip={muteSponsorBlockInsteadOfSkip}
           />
         )}
       </MediaPlayer>

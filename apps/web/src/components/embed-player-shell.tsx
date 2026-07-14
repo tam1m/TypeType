@@ -1,5 +1,6 @@
 import { usePlayerError } from "../hooks/use-player-error";
 import { useSettings } from "../hooks/use-settings";
+import { useWatchSponsorBlock } from "../hooks/use-watch-sponsorblock";
 import { useWatchVttAssets } from "../hooks/use-watch-layout-assets";
 import type { VideoStream } from "../types/stream";
 import { EmbedPlayer } from "./embed-player";
@@ -9,9 +10,10 @@ type Props = {
   videoId: string;
   startTime: number;
   autoplay: boolean;
+  isAuthed: boolean;
 };
 
-export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props) {
+export function EmbedPlayerShell({ stream, videoId, startTime, autoplay, isAuthed }: Props) {
   const { settings, settingsReady, update } = useSettings();
   const isLive = stream.isLive ?? false;
   const { manifestSrc, handleError, retryKey } = usePlayerError(
@@ -28,6 +30,9 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
     settings.sponsorBlockShowChapters,
   );
 
+  const sponsor = useWatchSponsorBlock(stream, settings);
+  const autoSkipSponsorBlock = isAuthed && settings.sponsorBlockMode !== "disabled";
+
   return (
     <EmbedPlayer
         key={retryKey}
@@ -41,7 +46,12 @@ export function EmbedPlayerShell({ stream, videoId, startTime, autoplay }: Props
         streamType={stream.isLive ? "live" : "on-demand"}
         chaptersVtt={chaptersVtt}
         thumbnailVtt={thumbnailVtt}
-        sponsorBlockSegments={stream.sponsorBlockSegments}
+        sponsorBlockSegments={sponsor.segments}
+        autoSkipSponsorBlockSegments={isAuthed ? sponsor.autoSkipSegments : []}
+        manualSkipSponsorBlockSegments={isAuthed ? sponsor.manualSkipSegments : sponsor.segments}
+        autoSkipSponsorBlock={autoSkipSponsorBlock}
+        muteSponsorBlockInsteadOfSkip={settings.sponsorBlockMuteInsteadOfSkip}
+        showCurrentSponsorBlockSegment={settings.sponsorBlockShowCurrentSegment}
         captionStyles={settings.captionStyles}
         onCaptionStylesChange={(captionStyles) => update.mutate({ captionStyles })}
         onError={handleError}
