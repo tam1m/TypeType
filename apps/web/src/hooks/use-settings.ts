@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { fetchSettings, updateSettings } from "../lib/api-user";
 import { EMPTY_CAPTION_STYLES } from "../lib/caption-styles";
 import { DEFAULT_SPONSORBLOCK_CATEGORY_ACTIONS } from "../lib/sponsorblock-settings";
@@ -68,7 +69,10 @@ export function useSettings() {
     },
   });
 
-  const settings = query.data ? { ...DEFAULTS, ...query.data } : DEFAULTS;
+  const settings = useMemo(
+    () => (query.data ? { ...DEFAULTS, ...query.data } : DEFAULTS),
+    [query.data],
+  );
 
   return { query, update, settings, settingsReady };
 }
