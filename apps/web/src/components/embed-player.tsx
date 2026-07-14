@@ -18,7 +18,7 @@ import { MediaProgressEvents } from "./media-progress-events";
 import { MediaSessionSync } from "./media-session-sync";
 import { PlayerDefaults } from "./player-defaults";
 import { PlayerHotkeys } from "./player-hotkeys";
-import { PlayerSeeker, SponsorBlockSkipper } from "./player-internals";
+import { PlayerFocuser, PlayerSeeker, SponsorBlockSkipper } from "./player-internals";
 import { PlayerPlayPauseIndicator } from "./player-play-pause-indicator";
 import { QualitySelector } from "./quality-selector";
 import { SponsorBlockBar } from "./sponsorblock-bar";
@@ -53,6 +53,7 @@ type Props = {
   settingsReady?: boolean;
   defaultAudioLanguage?: string;
   preferOriginalLanguage?: boolean;
+  defaultQuality?: string;
   originalAudioTrackId?: string | null;
   preferredDefaultAudioTrackId?: string | null;
   originalAudioLocale?: string | null;
@@ -90,6 +91,7 @@ export function EmbedPlayer({
   settingsReady = false,
   defaultAudioLanguage,
   preferOriginalLanguage,
+  defaultQuality,
   originalAudioTrackId,
   preferredDefaultAudioTrackId,
   originalAudioLocale,
@@ -189,7 +191,9 @@ export function EmbedPlayer({
           }}
         />
         <PlayerSeeker startTime={startTime} />
+        <PlayerFocuser />
         <PlayerDefaults
+          defaultQuality={defaultQuality}
           defaultAudioLanguage={defaultAudioLanguage || undefined}
           preferOriginalLanguage={shouldPreferOriginalLanguage}
           requireOriginalLanguage
