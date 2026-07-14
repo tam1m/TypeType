@@ -152,7 +152,6 @@ export function EmbedPlayer({
         storage={null}
         onProviderChange={handleProviderChange}
         onError={handleError}
-        onEnded={handleEnded}
         className="w-full h-full dark"
       >
         <MediaProvider>
