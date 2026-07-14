@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { EmbedPlayerShell } from "../components/embed-player-shell";
 import { useAuth } from "../hooks/use-auth";
+import { useInstance } from "../hooks/use-instance";
 import { useSettings } from "../hooks/use-settings";
 import { MEMBER_ONLY_MESSAGE, useStream } from "../hooks/use-stream";
 import { ApiError } from "../lib/api";
@@ -48,21 +49,21 @@ function EmbedError({ message }: { message: string }) {
   );
 }
 
-function EmbedSignIn() {
+function EmbedAuthRequired({ watchUrl }: { watchUrl: string }) {
   return (
     <div className="w-full h-full bg-black flex items-center justify-center px-4">
       <div className="flex max-w-sm flex-col items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-6 text-center">
-        <h1 className="text-base font-semibold text-white">Sign in to view</h1>
+        <h1 className="text-base font-semibold text-white">Embed unavailable</h1>
         <p className="text-sm text-zinc-400">
-          This instance requires authentication to play embedded videos.
+          This instance does not allow guest access, which is required for embedded playback.
         </p>
         <a
-          href="/login"
+          href={watchUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1 inline-flex h-9 items-center rounded-lg bg-white px-4 text-sm font-medium text-black transition-opacity hover:opacity-90"
         >
-          Sign in
+          Go to video
         </a>
       </div>
     </div>
@@ -73,27 +74,28 @@ function EmbedPage() {
   const { videoId } = Route.useParams();
   const { t, autoplay } = Route.useSearch();
   const sourceUrl = toWatchSourceUrl(videoId);
+  const watchUrl = `/watch?v=${encodeURIComponent(videoId)}`;
+  const { data: instance, isLoading: instanceLoading } = useInstance();
   const { authReady, isAuthed } = useAuth();
   const { settings, settingsReady } = useSettings();
+  const guestAllowed = instance?.guestAllowed ?? false;
   const useAuthenticatedStream = isAuthed && settings.accessMode === "allow_list";
-  const streamEnabled = authReady && (!isAuthed || settingsReady);
+  const streamEnabled = guestAllowed && authReady && (!isAuthed || settingsReady);
   const {
     data: stream,
-    isLoading,
     isError,
     error,
   } = useStream(sourceUrl, useAuthenticatedStream, streamEnabled);
   const startTime = parseStartTime(t) * 1000;
   const shouldAutoplay = autoplay === 1;
 
-  if (isLoading && !stream) return <EmbedLoading />;
-  if (!authReady) return <EmbedLoading />;
+  if (instanceLoading || !instance) return <EmbedLoading />;
 
-  if (isError || !stream) {
-    const isAuthError =
-      error instanceof ApiError && (error.status === 401 || error.status === 403);
-    if (isAuthError && !isAuthed) {
-      return <EmbedSignIn />;
+  if (!guestAllowed) return <EmbedAuthRequired watchUrl={watchUrl} />;
+
+  if (isError) {
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      return <EmbedAuthRequired watchUrl={watchUrl} />;
     }
     const message =
       error instanceof ApiError && (error.status === 400 || error.status === 422)
@@ -105,6 +107,8 @@ function EmbedPage() {
       />
     );
   }
+
+  if (!stream) return <EmbedLoading />;
 
   if (stream.requiresMembership) {
     return <EmbedError message={MEMBER_ONLY_MESSAGE} />;
