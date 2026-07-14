@@ -80,7 +80,7 @@ function EmbedPage() {
   const { settings, settingsReady } = useSettings();
   const guestAllowed = instance?.guestAllowed ?? false;
   const useAuthenticatedStream = isAuthed && settings.accessMode === "allow_list";
-  const streamEnabled = guestAllowed && authReady && (!isAuthed || settingsReady);
+  const streamEnabled = (guestAllowed || isAuthed) && authReady && (!isAuthed || settingsReady);
   const {
     data: stream,
     isError,
@@ -91,7 +91,7 @@ function EmbedPage() {
 
   if (instanceLoading || !instance) return <EmbedLoading />;
 
-  if (!guestAllowed) return <EmbedAuthRequired watchUrl={watchUrl} />;
+  if (!guestAllowed && !isAuthed) return <EmbedAuthRequired watchUrl={watchUrl} />;
 
   if (isError) {
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
